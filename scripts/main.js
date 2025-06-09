@@ -69,7 +69,7 @@ trainee: {
   image: ...
   selected: false/true // whether user selected them
   eliminated: false/true
-  top14: false/true
+  top12: false/true
 }
 */
 function convertCSVArrayToTraineeData(csvArrays) {
@@ -87,7 +87,7 @@ function convertCSVArrayToTraineeData(csvArrays) {
     trainee.grade = traineeArray[4];
     trainee.birthyear = traineeArray[5];
     trainee.eliminated = traineeArray[6] === 'e'; // sets trainee to be eliminated if 'e' appears in 6th col
-    trainee.top14 = traineeArray[6] === 't'; // sets trainee to top 14 if 't' appears in 6th column
+    trainee.top9 = traineeArray[6] === 't'; // sets trainee to top 12 if 't' appears in 6th column
     trainee.id = parseInt(traineeArray[7]) - 1; // trainee id is the original ordering of the trainees in the first csv
     trainee.image =
       trainee.name_romanized.replace(" ", "").replace("-", "") + ".jpg";
@@ -111,7 +111,7 @@ function newTrainee() {
 // Constructor for a blank ranking list
 function newRanking() {
   // holds the ordered list of rankings that the user selects
-  let ranking = new Array(14);
+  let ranking = new Array(12);
   for (let i = 0; i < ranking.length; i++) {
     ranking[i] = newTrainee();
   }
@@ -177,14 +177,14 @@ function populateTable(trainees) {
 function populateTableEntry(trainee) {
   // eliminated will have value "eliminated" only if trainee is eliminated and showEliminated is true, otherwise this is ""
   let eliminated = (showEliminated && trainee.eliminated) && "eliminated";
-  let top14 = (showTop14 && trainee.top14) && "top14";
+  let top9 = (showTop9 && trainee.top9) && "top9";
   const tableEntry = `
   <div class="table__entry ${eliminated}">
     <div class="table__entry-icon">
       <img class="table__entry-img" src="assets/trainees/${trainee.image}" />
       <div class="table__entry-icon-border ${trainee.grade.toLowerCase()}-rank-border"></div>
       ${
-        top14 ? '<div class="table__entry-icon-crown"></div>' : ''
+        top9 ? '<div class="table__entry-icon-crown"></div>' : ''
       }
       ${
         trainee.selected ? '<img class="table__entry-check" src="assets/check.png"/>' : ""
@@ -251,7 +251,7 @@ function populateRankingEntry(trainee, currRank) {
     modifiedCompany = abbreviatedCompanies[modifiedCompany];
   }
   let eliminated = (showEliminated && trainee.eliminated) && "eliminated";
-  let top14 = (showTop14 && trainee.top14) && "top14";
+  let top9 = (showTop9 && trainee.top9) && "top9";
   const rankingEntry = `
   <div class="ranking__entry ${eliminated}">
     <div class="ranking__entry-view">
@@ -261,7 +261,7 @@ function populateRankingEntry(trainee, currRank) {
       </div>
       <div class="ranking__entry-icon-badge bg-${trainee.grade.toLowerCase()}">${currRank}</div>
       ${
-        top14 ? '<div class="ranking__entry-icon-crown"></div>' : ''
+        top9 ? '<div class="ranking__entry-icon-crown"></div>' : ''
       }
     </div>
     <div class="ranking__row-text">
@@ -313,6 +313,44 @@ function swapTrainees(index1, index2) {
   rerenderRanking();
 }
 
+// Controls alternate ways to spell trainee names
+// to add new entries use the following format:
+// <original>: [<alternate1>, <alternate2>, <alternate3>, etc...]
+// <original> is the original name as appearing on csv
+// all of it should be lower case
+const alternateRomanizations = {
+  'suh jimin': ['seo jimin'],
+  'an jeongmin': ['an jungmin', 'ahn jeongmin', 'ahn jungmin'],
+  'lee rayeon': ['lee nayeon'],
+  'you dayeon': ['yoo dayeon'],
+  'huh jiwon': ['heo jiwon'],
+  'sim seungeun': ['shim seungeun'],
+  'xu ziyin': ['roada'],
+  'su ruiqi': ['sury'],
+  'leung cheukying': ['cherry', 'liang zhuoying', 'cherena', 'lyeong choging'],
+  'fu yaning': ['jessie'],
+  'guinn myah': ['son maya'],
+  'hsu nientzu': ['nancy'],
+  'kim doah': ['doa'],
+  'cui wenmeixiu': ['mei'],
+  'huang xingqiao': ['lorina'],
+  'wang yale': ['yealy'],
+  'chen hsinwei': ['vivi'],
+  'zhang luofei': ['dolly'],
+  'wen zhe': ['shirley'],
+  'liu yuhan': ['sweety'],
+  'poon wingchi': ['gigi'],
+  'xu ruowei': ['helen'],
+  'joung min': ['jeong min'],
+  'lee chaeyun': ['lee chaeyoon'],
+  'lee yunji': ['lee yoonji'],
+  'kim suyeon': ['kim sooyeon'],
+  'seo youngeun': ['suh youngeun'],
+  'choi yujin': ['choi yoojin'],
+  'lee sunwoo': ['lee sunoo'],
+  'lee yeongyung': ['lee yungyung', 'lee yeongyeong']
+};
+
 // uses the current filter text to create a subset of trainees with matching info
 function filterTrainees(event) {
   let filterText = event.target.value.toLowerCase();
@@ -359,7 +397,7 @@ function removeRankedTrainee(trainee) {
   return false;
 }
 
-const currentURL = "https://produce48.github.io/";
+const currentURL = "https://gplanet999.github.io/";
 // Serializes the ranking into a string and appends that to the current URL
 function generateShareLink() {
   let shareCode = ranking.map(function (trainee) {
@@ -391,7 +429,7 @@ var trainees = [];
 var filteredTrainees = [];
 // holds the ordered list of rankings that the user selects
 var ranking = newRanking();
-const rowNums = [1, 2, 4, 5];
+const rowNums = [1, 3, 5];
 //window.addEventListener("load", function () {
   populateRanking();
   readFromCSV("./trainee_info.csv");
